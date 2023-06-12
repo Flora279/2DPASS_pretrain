@@ -1,0 +1,129 @@
+# Config format schema number
+format_version: 1
+
+###################
+## Model options
+model_params:
+  model_architecture: "arch_2dpass_3d_cylinder"
+
+  input_dims: 4
+  spatial_shape:
+    - 480
+    - 360
+    - 32
+  scale_list:
+    - 2
+    - 4
+    - 8
+    - 16
+
+  hiden_size: 64
+  num_classes: 20
+  backbone_2d: resnet34
+  pretrained2d: False
+
+###################
+## Dataset options
+dataset_params:
+  training_size: 19132
+  dataset_type: "point_image_dataset_semkitti"
+  pc_dataset_type: "SemanticKITTI"
+  collate_type: "collate_fn_default"
+  ignore_label: 0
+  label_mapping: "./config/label_mapping/semantic-kitti.yaml"
+  mask_ratio:
+    - 0.9   # <30m
+    - 0.7   # 30~50m
+    - 0.5   # >50m
+  # 2D augmentation
+  bottom_crop:
+    - 480
+    - 320
+  color_jitter:
+    - 0.4
+    - 0.4
+    - 0.4
+  flip2d: 0.5
+  image_normalizer:
+    - [0.485, 0.456, 0.406]
+    - [0.229, 0.224, 0.225]
+  max_volume_space:
+    - 50
+    - 3.1415926
+    - 2
+  min_volume_space:
+    - 0
+    - -3.1415926
+    - -4
+  seg_labelweights:
+    - 0
+    - 55437630
+    - 320797
+    - 541736
+    - 2578735
+    - 3274484
+    - 552662
+    - 184064
+    - 78858
+    - 240942562
+    - 17294618
+    - 170599734
+    - 6369672
+    - 230413074
+    - 101130274
+    - 476491114
+    - 9833174
+    - 129609852
+    - 4506626
+    - 1168181
+
+  train_data_loader:
+    data_path: "/storage/data/zhangjy/SemanticKITTI/kitti/dataset/sequences"
+    batch_size: 2
+    shuffle: True
+    num_workers: 1
+    rotate_aug: True
+    flip_aug: True
+    scale_aug: True
+    transform_aug: True
+    dropout_aug: True
+
+  val_data_loader:
+    data_path: "/storage/data/zhangjy/SemanticKITTI/kitti/dataset/sequences"
+    shuffle: False
+    num_workers: 1
+
+    # normal test
+    batch_size: 2
+    rotate_aug: False
+    flip_aug: False
+    scale_aug: False
+    transform_aug: False
+    dropout_aug: False
+
+
+###################
+## Train params
+train_params:
+  gpus:
+    - 0
+    - 1
+    - 2
+    - 3
+    #- 4
+    #- 5
+    #- 6
+    #- 7
+  log_dir: MAE_cylinder_scale_8_deconv2_20m40m_polar_feat
+  #log_dir: test
+  max_num_epochs: 10
+  base_lr: 0.03
+  optimizer: SGD  # [SGD, Adam]
+  lr_scheduler: CosineAnnealingWarmRestarts  # [StepLR, ReduceLROnPlateau, CosineAnnealingLR, CosineAnnealingWarmRestarts]
+  momentum: 0.9
+  nesterov: True
+  weight_decay: 1.0e-4
+
+  lambda_seg2d: 1
+  lambda_xm: 0.05
+  mixed_fp16: False
